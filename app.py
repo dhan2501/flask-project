@@ -17,9 +17,19 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)  # Initialize db with flask app
 
+# @app.route('/')
+# def home():
+#     return 'Home Page Loaded Successfully!'
+
 @app.route('/')
 def home():
-    return 'Home Page Loaded Successfully!'
+    # Query single main banner (for Hero section)
+    banner_main = Banner.query.first()  # Or select by type/flag
+
+    # Query other banners for Popular Destination
+    banners = Banner.query.all()
+
+    return render_template('home.html', banner_main=banner_main, banners=banners)
 
 
 @app.context_processor
