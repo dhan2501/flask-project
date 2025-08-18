@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Add Banner{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        {% include 'sidebar.html' %}
+    </div>
+    <div class="col-md-9">
+        <h2>Add New Banner</h2>
+        <form method="POST" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+            <div class="mb-3">
+                {{ form.image.label(class="form-label") }}
+                {{ form.image(class="form-control") }}
+            </div>
+            <div class="mb-3">
+                {{ form.alt_text.label(class="form-label") }}
+                {{ form.alt_text(class="form-control") }}
+            </div>
+            <div class="mb-3">
+                {{ form.read_more_link.label(class="form-label") }}
+                {{ form.read_more_link(class="form-control") }}
+            </div>
+            <div class="mb-3">
+                {{ form.heading.label(class="form-label") }}
+                {{ form.heading(class="form-control") }}
+            </div>
+            <div class="mb-3">
+                {{ form.sub_heading.label(class="form-label") }}
+                {{ form.sub_heading(class="form-control") }}
+            </div>
+            {{ form.submit(class="btn btn-primary") }}
+        </form>
+    </div>
+</div>
+{% endblock %}
