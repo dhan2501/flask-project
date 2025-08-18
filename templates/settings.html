@@ -7,9 +7,15 @@
     </div>
     <div class="col-md-9">
         <h2>Settings</h2>
-            <a href="{{ url_for('profile') }}" class="btn btn-secondary mb-3">Edit Profile</a>
+        <a href="{{ url_for('profile') }}" class="btn btn-secondary mb-3">Edit Profile</a>
         <form method="POST">
             {{ form.hidden_tag() }}
+
+            <div class="mb-3">
+                {{ form.old_password.label(class="form-label") }}
+                {{ form.old_password(class="form-control") }}
+            </div>
+
             <div class="mb-3">
                 {{ form.new_password.label(class="form-label") }}
                 {{ form.new_password(class="form-control") }}

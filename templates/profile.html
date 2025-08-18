@@ -8,9 +8,23 @@
     </div>
     <!-- Main Content -->
     <div class="col-md-9">
-        <h2>Your Profile({{user_name|capitalize}})</h2>
-        <form method="POST">
+        <h2>Your Profile ({{ user_name|capitalize }})</h2>
+
+        <!-- Display current avatar if exists -->
+        {% if form.avatar.data %}
+            <img src="{{ form.avatar.data.url }}" alt="Avatar" class="img-thumbnail mb-3" style="max-width: 150px;">
+        {% elif user.avatar_url %}
+            <img src="{{ user.avatar_url }}" alt="Avatar" class="img-thumbnail mb-3" style="max-width: 150px;">
+        {% endif %}
+
+        <form method="POST" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
+
+            <div class="mb-3">
+                {{ form.avatar.label(class="form-label") }}
+                {{ form.avatar(class="form-control") }}
+            </div>
+
             <div class="mb-3">
                 {{ form.username.label(class="form-label") }}
                 {{ form.username(class="form-control") }}
@@ -28,7 +42,9 @@
                 {{ form.nickname.label(class="form-label") }}
                 {{ form.nickname(class="form-control") }}
             </div>
+
             <hr>
+
             <div class="mb-3">
                 {{ form.password.label(class="form-label") }}
                 {{ form.password(class="form-control") }}

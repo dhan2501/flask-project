@@ -9,6 +9,7 @@ class User(db.Model):
     phone_number = db.Column(db.String(20), nullable=True)
     password_hash = db.Column(db.String(512), nullable=False)
     nickname = db.Column(db.String(50), nullable=True)
+    avatar_url = db.Column(db.String(255), nullable=True)  # Avatar image URL or path
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -27,3 +28,32 @@ class Banner(db.Model):
 
     def __repr__(self):
         return f"<Banner {self.heading}>"
+    
+
+class Blog(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    
+    # Blog content fields
+    image_url = db.Column(db.String(255), nullable=False)       # URL or path to blog image
+    alt_text = db.Column(db.String(150), nullable=True)         # Alt text for image accessibility
+    short_description = db.Column(db.String(500), nullable=True) # Short summary or excerpt
+    description = db.Column(db.Text, nullable=False)             # Full blog content
+    
+    # SEO related fields
+    meta_title = db.Column(db.String(255), nullable=True)
+    meta_description = db.Column(db.String(500), nullable=True)
+    meta_keywords = db.Column(db.String(255), nullable=True)      # Comma separated keywords
+
+     # Social Media related fields
+    twitter_title = db.Column(db.String(255), nullable=True)
+    twitter_description = db.Column(db.String(500), nullable=True)
+    twitter_keywords = db.Column(db.String(255), nullable=True)      # Comma separated keywords
+    
+    # Additional schema fields - example: JSON for extensibility
+    schema_data = db.Column(db.JSON, nullable=True)              # To store multiple schema data in JSON
+    
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    updated_at = db.Column(db.DateTime, onupdate=db.func.now())
+
+    def __repr__(self):
+        return f"<Blog {self.meta_title or self.short_description[:30]}>"

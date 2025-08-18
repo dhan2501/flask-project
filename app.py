@@ -5,7 +5,7 @@ import os
 from flask import current_app, request, flash, redirect, url_for, render_template, session
 from werkzeug.utils import secure_filename
 from forms import *
-from models import User, Banner
+from models import User, Banner, Blog
 from flask import request
 
 app = Flask(__name__)
@@ -20,6 +20,17 @@ db.init_app(app)  # Initialize db with flask app
 @app.route('/')
 def home():
     return 'Home Page Loaded Successfully!'
+
+
+@app.context_processor
+def inject_user():
+    user_name = session.get('user_name', 'User')
+    user = None
+    if user_name:
+        user = User.query.filter_by(username=user_name).first()
+    return dict(user_name=user_name, user=user)
+
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -83,9 +94,48 @@ def dashboard():
     return render_template('dashboard.html', user_name=session.get('user_name', 'User'))
 
 
+# @app.route('/profile', methods=['GET', 'POST'])
+# def profile():
+#     user_name = session.get('user_name', 'User')
+#     if not session.get('superuser'):
+#         flash('Access denied.')
+#         return redirect(url_for('login'))
+
+#     user = User.query.filter_by(username=session.get('user_name')).first()
+#     if not user:
+#         flash('User not found.')
+#         return redirect(url_for('login'))
+
+#     form = ProfileForm(obj=user)
+
+#     if form.validate_on_submit():
+#         # Update username too
+#         user.username = form.username.data
+#         user.email = form.email.data
+#         user.phone_number = form.phone_number.data
+#         user.nickname = form.nickname.data
+
+#         if form.password.data:
+#             user.set_password(form.password.data)
+
+#         db.session.commit()
+
+#         # Update session username if changed
+#         session['user_name'] = user.username
+
+#         flash("Profile updated successfully!")
+#         return redirect(url_for('profile'))
+
+#     return render_template('profile.html', form=form, user_name=user_name)
+
+# from werkzeug.utils import secure_filename
+# import os
+# from flask import current_app
+
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
     user_name = session.get('user_name', 'User')
+
     if not session.get('superuser'):
         flash('Access denied.')
         return redirect(url_for('login'))
@@ -98,7 +148,6 @@ def profile():
     form = ProfileForm(obj=user)
 
     if form.validate_on_submit():
-        # Update username too
         user.username = form.username.data
         user.email = form.email.data
         user.phone_number = form.phone_number.data
@@ -106,6 +155,18 @@ def profile():
 
         if form.password.data:
             user.set_password(form.password.data)
+
+        # Handle avatar file upload
+        if form.avatar.data:
+            avatar_file = form.avatar.data
+            filename = secure_filename(avatar_file.filename)
+            upload_folder = os.path.join(current_app.root_path, 'static', 'uploads', 'avatars')
+            os.makedirs(upload_folder, exist_ok=True)
+            filepath = os.path.join(upload_folder, filename)
+            avatar_file.save(filepath)
+
+            # Save relative URL path to avatar_url
+            user.avatar_url = url_for('static', filename=f'uploads/avatars/{filename}')
 
         db.session.commit()
 
@@ -115,11 +176,44 @@ def profile():
         flash("Profile updated successfully!")
         return redirect(url_for('profile'))
 
-    return render_template('profile.html', form=form, user_name=user_name)
+    return render_template('profile.html', form=form, user_name=user_name, user=user)
+
+
+
+
+# @app.route('/settings', methods=['GET', 'POST'])
+# def settings():
+#     user_name = session.get('user_name', 'User')
+#     if not session.get('superuser'):
+#         flash('Access denied.')
+#         return redirect(url_for('login'))
+
+#     user = User.query.filter_by(username=session.get('user_name')).first()
+#     if not user:
+#         flash('User not found.')
+#         return redirect(url_for('login'))
+
+#     form = SettingsForm()
+
+#     if form.validate_on_submit():
+#         if form.new_password.data:
+#             user.set_password(form.new_password.data)
+#         # Save email notification preference in your user model if available
+#         # user.email_notifications = form.email_notifications.data
+        
+#         db.session.commit()
+#         flash('Settings updated!')
+#         return redirect(url_for('settings'))
+
+#     # Prepopulate form from user data if needed
+#     # form.email_notifications.data = user.email_notifications if hasattr(user, 'email_notifications') else False
+
+#     return render_template('settings.html', form=form, user_name=user_name)
 
 
 @app.route('/settings', methods=['GET', 'POST'])
 def settings():
+    user_name = session.get('user_name', 'User')
     if not session.get('superuser'):
         flash('Access denied.')
         return redirect(url_for('login'))
@@ -132,20 +226,25 @@ def settings():
     form = SettingsForm()
 
     if form.validate_on_submit():
+        # Validate old password before allowing change
+        if not user.check_password(form.old_password.data):
+            flash('Old password is incorrect.')
+            return redirect(url_for('settings'))
+
         if form.new_password.data:
             user.set_password(form.new_password.data)
-        # Save email notification preference in your user model if available
+
+        # Save email notification preference if your user model has this field
         # user.email_notifications = form.email_notifications.data
-        
+
         db.session.commit()
         flash('Settings updated!')
         return redirect(url_for('settings'))
 
-    # Prepopulate form from user data if needed
-    # form.email_notifications.data = user.email_notifications if hasattr(user, 'email_notifications') else False
+    # Prepopulate email_notifications field if applicable
+    # form.email_notifications.data = getattr(user, 'email_notifications', False)
 
-    return render_template('settings.html', form=form)
-
+    return render_template('settings.html', form=form, user_name=user_name)
 
 
 
@@ -232,6 +331,40 @@ def update_banner(banner_id):
     return render_template('update_banner.html', form=form, banner=banner)
 
 
+@app.route('/blog/add', methods=['GET', 'POST'])
+def add_blog():
+    form = BlogForm()
+    if form.validate_on_submit():
+        image_file = form.image.data
+        filename = None
+        if image_file:
+            filename = secure_filename(image_file.filename)
+            upload_folder = os.path.join(current_app.root_path, 'static', 'uploads')
+            os.makedirs(upload_folder, exist_ok=True)
+            image_path = os.path.join(upload_folder, filename)
+            image_file.save(image_path)
+            image_url = url_for('static', filename='uploads/' + filename, _external=True)
+        else:
+            image_url = None
+        
+        blog = Blog(
+            image_url=image_url or "",
+            alt_text=form.alt_text.data,
+            short_description=form.short_description.data,
+            description=form.description.data,
+            meta_title=form.meta_title.data,
+            meta_description=form.meta_description.data,
+            meta_keywords=form.meta_keywords.data,
+            twitter_title=form.twitter_title.data,
+            twitter_description=form.twitter_description.data,
+            twitter_keywords=form.twitter_keywords.data,
+            schema_data=None  # Or handle schema JSON if you have it in form
+        )
+        db.session.add(blog)
+        db.session.commit()
+        flash('Blog added successfully!')
+        return redirect(url_for('blog_list'))
+    return render_template('add_blog.html', form=form)
 
 
 # if __name__ == '__main__':

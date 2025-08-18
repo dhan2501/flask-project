@@ -2,7 +2,7 @@ body {
     background-color: #f5f5f5;
     font-family: Arial, sans-serif;
 }
-.container {
+/* .container {
     width: 60%;
     margin: 0 auto;
     text-align: center;
@@ -10,4 +10,95 @@ body {
     padding: 50px;
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
     margin-top: 100px;
+} */
+
+/* Sidebar container */
+#sidebar {
+    background: #18191a !important;
+    color: #fff !important;
+    min-width: 220px;
+    height: 100vh;
+    padding: 32px 0 0 0;
+    border-right: 1px solid #23232a;
+    font-size: 1.05rem;
+}
+
+/* Profile area */
+#sidebar .mb-4 img {
+    width: 76px;
+    height: 76px;
+    object-fit: cover;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 8px;
+}
+#sidebar .mb-4 h5 {
+    font-weight: 600;
+}
+
+/* Remove underline, space nav vertically */
+#sidebar ul.nav {
+    padding-left: 0;
+    margin-bottom: 0;
+}
+#sidebar .nav-link {
+    color: #fff !important;
+    padding: 12px 22px;
+    border-radius: 6px;
+    transition: background 0.2s, color 0.2s;
+    margin-bottom: 2px;
+    font-size: 1.03rem;
+}
+
+#sidebar .nav-link.active,
+#sidebar .nav-link.bg-secondary {
+    background-color: #41434c !important;
+    color: #fff !important;
+}
+
+#sidebar .nav-link:hover {
+    background: #23232f !important;
+    color: #ffd700 !important;
+}
+
+#sidebar .dropdown-toggle::after {
+    vertical-align: middle;
+    margin-left: 8px;
+}
+
+#sidebar .collapse .nav-link {
+    font-size: 0.99rem;
+    padding-left: 42px;
+    background: none;
+    color: #cbd1d8 !important;
+}
+
+#sidebar .collapse .nav-link.active {
+    background: #41434c !important;
+    color: #fff !important;
+}
+
+/* Copyright and link */
+#sidebar .text-xs {
+    margin-top: 32px;
+    color: #a7a7a7 !important;
+    font-size: 0.85rem;
+}
+#sidebar a.text-warning {
+    color: #ffd700 !important;
+    text-decoration: none;
+}
+
+/* Scrollbar style (optional, for aesthetic) */
+#sidebar {
+    overflow-y: auto;
+}
+#sidebar::-webkit-scrollbar {
+    width: 8px;
+    background: #23232a;
+}
+#sidebar::-webkit-scrollbar-thumb {
+    background: #37393c;
+    border-radius: 4px;
 }

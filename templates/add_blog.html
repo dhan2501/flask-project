@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Add New Blog{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        {% include 'sidebar.html' %}
+    </div>
+    <div class="col-md-9">
+        <div class="container mt-4">
+            <h2>Add New Blog</h2>
+            <form method="POST" enctype="multipart/form-data">
+                {{ form.hidden_tag() }}
+
+                <div class="mb-3">
+                    {{ form.image.label(class="form-label") }}
+                    {{ form.image(class="form-control") }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.alt_text.label(class="form-label") }}
+                    {{ form.alt_text(class="form-control") }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.short_description.label(class="form-label") }}
+                    {{ form.short_description(class="form-control") }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.description.label(class="form-label") }}
+                    {{ form.description(class="form-control", rows="5") }}
+                </div>
+
+                <hr />
+
+                <h5>SEO Fields</h5>
+                <div class="mb-3">
+                    {{ form.meta_title.label(class="form-label") }}
+                    {{ form.meta_title(class="form-control") }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.meta_description.label(class="form-label") }}
+                    {{ form.meta_description(class="form-control", rows="3") }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.meta_keywords.label(class="form-label") }}
+                    {{ form.meta_keywords(class="form-control") }}
+                </div>
+
+                <hr />
+
+                <h5>Social Media Fields</h5>
+                <div class="mb-3">
+                    {{ form.twitter_title.label(class="form-label") }}
+                    {{ form.twitter_title(class="form-control") }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.twitter_description.label(class="form-label") }}
+                    {{ form.twitter_description(class="form-control", rows="3") }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.twitter_keywords.label(class="form-label") }}
+                    {{ form.twitter_keywords(class="form-control") }}
+                </div>
+
+                <button type="submit" class="btn btn-primary">Add Blog</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

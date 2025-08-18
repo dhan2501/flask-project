@@ -1,8 +1,83 @@
-<div class="list-group">
-    <a href="{{ url_for('dashboard') }}" class="list-group-item list-group-item-action {% if request.endpoint == 'dashboard' %}active{% endif %}">Dashboard</a>
-    <a href="{{ url_for('profile') }}" class="list-group-item list-group-item-action {% if request.endpoint == 'profile' %}active{% endif %}">Profile</a>
-    <a href="{{ url_for('settings') }}" class="list-group-item list-group-item-action {% if request.endpoint == 'settings' %}active{% endif %}">Settings</a>
-    <a href="{{ url_for('add_banner') }}" class="list-group-item list-group-item-action {% if request.endpoint == 'add_banner' %}active{% endif %}">Add Banner</a>
-    <a href="{{ url_for('banner_list') }}" class="list-group-item list-group-item-action {% if request.endpoint == 'banner_list' %}active{% endif %}">Banner List</a>
-    <a href="{{ url_for('logout') }}" class="list-group-item list-group-item-action">Logout</a>
+<!-- Sidebar Start -->
+<nav id="sidebar" class="bg-dark text-white vh-100 p-3" style="min-width:220px;">
+   <div class="mb-4 text-center">
+    {% if user and user.avatar_url %}
+        <img src="{{ user.avatar_url }}" class="rounded-circle mb-2" width="80" height="80" alt="Avatar">
+    {% else %}
+        <img src="{{ url_for('static', filename='avatar.jpg') }}" class="rounded-circle mb-2" width="80" height="80" alt="Avatar">
+    {% endif %}
+    <h5 class="mb-0">Welcome to ({{ user_name|capitalize }})</h5>
 </div>
+
+    <ul class="nav flex-column">
+        <li class="nav-item mb-1">
+            <a href="{{ url_for('dashboard') }}" class="nav-link text-white {% if request.endpoint == 'dashboard' %}active bg-secondary{% endif %} rounded px-3 py-2">
+                Home
+            </a>
+        </li>
+
+        <li class="nav-item mb-1">
+            <a href="{{ url_for('profile') }}" class="nav-link text-white {% if request.endpoint == 'profile' %}active bg-secondary{% endif %} rounded px-3 py-2">
+                Profile
+            </a>
+        </li>
+
+        <li class="nav-item mb-1">
+            <a href="{{ url_for('settings') }}" class="nav-link text-white {% if request.endpoint == 'settings' %}active bg-secondary{% endif %} rounded px-3 py-2">
+                Settings
+            </a>
+        </li>
+
+        <!-- Banner Dropdown -->
+        <li class="nav-item mb-1">
+            <a class="nav-link text-white px-3 py-2 rounded dropdown-toggle {% if request.endpoint in ['add_banner', 'banner_list'] %}active bg-secondary{% endif %}" 
+               href="#" id="bannerDropdown" data-bs-toggle="collapse" data-bs-target="#bannerSubmenu" aria-expanded="false" aria-controls="bannerSubmenu">
+                Banner
+            </a>
+            <div class="collapse {% if request.endpoint in ['add_banner', 'banner_list'] %}show{% endif %}" id="bannerSubmenu">
+                <ul class="nav flex-column ms-3">
+                    <li class="nav-item mb-1">
+                        <a href="{{ url_for('add_banner') }}" class="nav-link text-white {% if request.endpoint == 'add_banner' %}active bg-secondary{% endif %} rounded px-3 py-2">
+                            Add Banner
+                        </a>
+                    </li>
+                    <li class="nav-item mb-1">
+                        <a href="{{ url_for('banner_list') }}" class="nav-link text-white {% if request.endpoint == 'banner_list' %}active bg-secondary{% endif %} rounded px-3 py-2">
+                            Banner List
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </li>
+
+        <!-- Blog Dropdown -->
+        <li class="nav-item mb-1">
+            <a class="nav-link text-white px-3 py-2 rounded dropdown-toggle {% if request.endpoint in ['add_blog'] %}active bg-secondary{% endif %}" 
+               href="#" id="blogDropdown" data-bs-toggle="collapse" data-bs-target="#blogSubmenu" aria-expanded="false" aria-controls="blogSubmenu">
+                Blog
+            </a>
+            <div class="collapse {% if request.endpoint in ['add_blog'] %}show{% endif %}" id="blogSubmenu">
+                <ul class="nav flex-column ms-3">
+                    <li class="nav-item mb-1">
+                        <a href="{{ url_for('add_blog') }}" class="nav-link text-white {% if request.endpoint == 'add_blog' %}active bg-secondary{% endif %} rounded px-3 py-2">
+                            Add Blog
+                        </a>
+                    </li>
+                    <!-- Add other blog menu items here as needed -->
+                </ul>
+            </div>
+        </li>
+
+        <li class="nav-item mb-1 mt-3">
+            <a href="{{ url_for('logout') }}" class="nav-link text-white rounded px-3 py-2">
+                Logout
+            </a>
+        </li>
+    </ul>
+    <hr class="my-4 bg-light" />
+    <div class="text-xs text-muted text-center" style="font-size:0.85rem;">
+        Copyright &copy;2025 All rights reserved<br>
+        This template is made with by <a href="#" class="text-warning" target="_blank">Dhananjay Gupta</a>
+    </div>
+</nav>
+<!-- Sidebar End -->
