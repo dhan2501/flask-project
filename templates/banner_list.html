@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Banner List{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        {% include 'sidebar.html' %}
+    </div>
+    <div class="col-md-9">
+        <h2>Banner List</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Heading</th>
+                    <th>Sub Heading</th>
+                    <th>Alt Text</th>
+                    <th>Read More Link</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for banner in banners %}
+                <tr>
+                    <td><img src="{{ banner.image_url }}" alt="{{ banner.alt_text }}" style="height:80px;"></td>
+                    <td>{{ banner.heading }}</td>
+                    <td>{{ banner.sub_heading or '' }}</td>
+                    <td>{{ banner.alt_text or '' }}</td>
+                    <td><a href="{{ banner.read_more_link }}" target="_blank">{{ banner.read_more_link }}</a></td>
+                    <td>
+                        <a href="{{ url_for('update_banner', banner_id=banner.id) }}" class="btn btn-sm btn-primary">Edit</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center">No banners found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

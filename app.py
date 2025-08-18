@@ -183,6 +183,54 @@ def add_banner():
 
     return render_template('banner.html', form=form)
 
+@app.route('/banner_list')
+def banner_list():
+    if not session.get('superuser'):
+        flash('Access denied.')
+        return redirect(url_for('login'))
+
+    banners = Banner.query.all()
+    return render_template('banner_list.html', banners=banners)
+
+
+# from werkzeug.utils import secure_filename
+# import os
+# from flask import current_app
+
+@app.route('/update_banner/<int:banner_id>', methods=['GET', 'POST'])
+def update_banner(banner_id):
+    if not session.get('superuser'):
+        flash('Access denied.')
+        return redirect(url_for('login'))
+    
+    banner = Banner.query.get_or_404(banner_id)
+    form = BannerForm(obj=banner)
+    
+    if form.validate_on_submit():
+        # Handle image upload only if a new image is provided
+        if form.image.data:
+            image_file = form.image.data
+            filename = secure_filename(image_file.filename)
+            upload_folder = os.path.join(current_app.root_path, 'static', 'uploads')
+            os.makedirs(upload_folder, exist_ok=True)
+            image_path = os.path.join(upload_folder, filename)
+            image_file.save(image_path)
+            
+            # Update image url in database
+            banner.image_url = url_for('static', filename='uploads/' + filename, _external=True)
+
+        # Update other fields
+        banner.alt_text = form.alt_text.data
+        banner.read_more_link = form.read_more_link.data
+        banner.heading = form.heading.data
+        banner.sub_heading = form.sub_heading.data
+        
+        db.session.commit()
+        flash('Banner updated successfully!')
+        return redirect(url_for('banner_list'))
+
+    return render_template('update_banner.html', form=form, banner=banner)
+
 
 
 

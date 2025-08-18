@@ -3,5 +3,6 @@
     <a href="{{ url_for('profile') }}" class="list-group-item list-group-item-action {% if request.endpoint == 'profile' %}active{% endif %}">Profile</a>
     <a href="{{ url_for('settings') }}" class="list-group-item list-group-item-action {% if request.endpoint == 'settings' %}active{% endif %}">Settings</a>
     <a href="{{ url_for('add_banner') }}" class="list-group-item list-group-item-action {% if request.endpoint == 'add_banner' %}active{% endif %}">Add Banner</a>
+    <a href="{{ url_for('banner_list') }}" class="list-group-item list-group-item-action {% if request.endpoint == 'banner_list' %}active{% endif %}">Banner List</a>
     <a href="{{ url_for('logout') }}" class="list-group-item list-group-item-action">Logout</a>
 </div>
