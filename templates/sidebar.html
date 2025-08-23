@@ -51,7 +51,7 @@
         </li>
 
         <!-- Blog Dropdown -->
-        <li class="nav-item mb-1">
+        {#% comment %} <li class="nav-item mb-1">
             <a class="nav-link text-white px-3 py-2 rounded dropdown-toggle {% if request.endpoint in ['add_blog'] %}active bg-secondary{% endif %}" 
                href="#" id="blogDropdown" data-bs-toggle="collapse" data-bs-target="#blogSubmenu" aria-expanded="false" aria-controls="blogSubmenu">
                 Blog
@@ -63,10 +63,74 @@
                             Add Blog
                         </a>
                     </li>
-                    <!-- Add other blog menu items here as needed -->
                 </ul>
             </div>
-        </li>
+        </li> {% endcomment %#}
+        <!-- Blog Dropdown -->
+<li class="nav-item mb-1">
+    <a class="nav-link text-white px-3 py-2 rounded dropdown-toggle {% if request.endpoint in ['add_blog', 'blog_list'] %}active bg-secondary{% endif %}" 
+       href="#" id="blogDropdown" data-bs-toggle="collapse" data-bs-target="#blogSubmenu" aria-expanded="false" aria-controls="blogSubmenu">
+        Blog
+    </a>
+    <div class="collapse {% if request.endpoint in ['add_blog', 'blog_list'] %}show{% endif %}" id="blogSubmenu">
+        <ul class="nav flex-column ms-3">
+            <li class="nav-item mb-1">
+                <a href="{{ url_for('add_blog') }}" class="nav-link text-white {% if request.endpoint == 'add_blog' %}active bg-secondary{% endif %} rounded px-3 py-2">
+                    Add Blog
+                </a>
+            </li>
+            <li class="nav-item mb-1">
+                <a href="{{ url_for('blog_list') }}" class="nav-link text-white {% if request.endpoint == 'blog_list' %}active bg-secondary{% endif %} rounded px-3 py-2">
+                    Blog List
+                </a>
+            </li>
+        </ul>
+    </div>
+</li>
+
+<li class="nav-item mb-1">
+    <a class="nav-link text-white px-3 py-2 rounded dropdown-toggle {% if request.endpoint in ['add_category', 'category_list', 'edit_category'] %}active bg-secondary{% endif %}" 
+       href="#" id="categoryDropdown" data-bs-toggle="collapse" data-bs-target="#categorySubmenu" aria-expanded="false" aria-controls="categorySubmenu">
+        Category
+    </a>
+    <div class="collapse {% if request.endpoint in ['add_category', 'category_list', 'edit_category'] %}show{% endif %}" id="categorySubmenu">
+        <ul class="nav flex-column ms-3">
+            <li class="nav-item mb-1">
+                <a href="{{ url_for('add_category') }}" class="nav-link text-white {% if request.endpoint == 'add_category' %}active bg-secondary{% endif %} rounded px-3 py-2">
+                    Add Category
+                </a>
+            </li>
+            <li class="nav-item mb-1">
+                <a href="{{ url_for('category_list') }}" class="nav-link text-white {% if request.endpoint == 'category_list' %}active bg-secondary{% endif %} rounded px-3 py-2">
+                    Category List
+                </a>
+            </li>
+        </ul>
+    </div>
+</li>
+
+<li class="nav-item mb-1">
+    <a class="nav-link text-white px-3 py-2 rounded dropdown-toggle {% if request.endpoint in ['help', 'contact_support'] %}active bg-secondary{% endif %}" 
+       href="#" id="supportDropdown" data-bs-toggle="collapse" data-bs-target="#supportSubmenu" aria-expanded="false" aria-controls="supportSubmenu">
+        Support
+    </a>
+    <div class="collapse {% if request.endpoint in ['help', 'contact_support'] %}show{% endif %}" id="supportSubmenu">
+        <ul class="nav flex-column ms-3">
+            <li class="nav-item mb-1">
+                <a href="{{ url_for('help') }}" class="nav-link text-white rounded px-3 py-2 {% if request.endpoint == 'help' %}active bg-secondary{% endif %}">
+                    <i class="bi bi-question-circle me-2"></i> Help / FAQ
+                </a>
+            </li>
+            <li class="nav-item mb-1">
+                <a href="{{ url_for('contact_support') }}" class="nav-link text-white rounded px-3 py-2 {% if request.endpoint == 'contact_support' %}active bg-secondary{% endif %}">
+                    <i class="bi bi-envelope me-2"></i> Contact Support
+                </a>
+            </li>
+        </ul>
+    </div>
+</li>
+
+
 
         <li class="nav-item mb-1 mt-3">
             <a href="{{ url_for('logout') }}" class="nav-link text-white rounded px-3 py-2">

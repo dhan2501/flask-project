@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Add New Category{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        {% include 'sidebar.html' %}
+    </div>
+    <div class="col-md-9">
+<div class="container mt-4">
+    <h2>Help / FAQ</h2>
+    <p>Here you can provide frequently asked questions and helpful information for users.</p>
+    <ul>
+        <li><strong>How to add a blog?</strong> - You can add a blog via the "Add Blog" menu item.</li>
+        <li><strong>How to manage categories?</strong> - Use the "Category" section in the sidebar.</li>
+        <!-- Add more FAQs as needed -->
+    </ul>
+</div>
+    </div>
+</div>
+{% endblock %}

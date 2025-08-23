@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Blog List{% endblock %}
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        {% include 'sidebar.html' %}
+    </div>
+    <div class="col-md-9">
+        <h2>Blog List</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Title</th>
+                    <th>Short Description</th>
+                    <th>Category</th>  <!-- New Category column -->
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for blog in blogs %}
+                <tr>
+                    <td>
+                        {% if blog.image_url %}
+                        <img src="{{ blog.image_url }}" alt="{{ blog.alt_text }}" style="height:80px;">
+                        {% else %}
+                        <span class="text-muted">No image</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ blog.meta_title or "Untitled Blog" }}</td>
+                    <td>{{ blog.short_description }}</td>
+                    <td>
+                        {{ blog.category.name if blog.category else "Uncategorized" }}
+                    </td>
+                    <td class="actions-cell">
+                        <div class="actions-group">
+                            <a href="{{ url_for('blog_detail', blog_id=blog.id) }}" class="btn btn-sm btn-secondary" title="View">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{{ url_for('edit_blog', blog_id=blog.id) }}" class="btn btn-sm btn-primary" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center">No blogs found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

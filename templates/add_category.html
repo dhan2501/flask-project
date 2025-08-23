@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Add New Category{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        {% include 'sidebar.html' %}
+    </div>
+    <div class="col-md-9">
+        <div class="container mt-4">
+            <h2>Add New Category</h2>
+            <form method="POST">
+                {{ form.hidden_tag() }}
+
+                <div class="mb-3">
+                    {{ form.name.label(class="form-label") }}
+                    {{ form.name(class="form-control") }}
+                    {% if form.name.errors %}
+                        <div class="text-danger">
+                            {{ form.name.errors[0] }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.description.label(class="form-label") }}
+                    {{ form.description(class="form-control", rows="5") }}
+                    {% if form.description.errors %}
+                        <div class="text-danger">
+                            {{ form.description.errors[0] }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="btn btn-primary">Add Category</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

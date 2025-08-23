@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Blog List{% endblock %}
+{% block content %}
+<div class="row">
+    <!-- Sidebar -->
+    <div class="col-md-3">
+        {% include 'sidebar.html' %}
+    </div>
+    <!-- Main Content -->
+    <div class="col-md-9">
+    <h2>Edit Blog Post</h2>
+
+    <form method="POST" enctype="multipart/form-data">
+        {{ form.hidden_tag() }}
+
+        <div class="mb-3">
+            {{ form.image.label(class="form-label") }}
+            {{ form.image(class="form-control") }}
+            {% if blog.image_url %}
+            <img src="{{ blog.image_url }}" alt="{{ blog.alt_text }}" class="img-thumbnail mt-2" style="max-height: 150px;">
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.alt_text.label(class="form-label") }}
+            {{ form.alt_text(class="form-control") }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.short_description.label(class="form-label") }}
+            {{ form.short_description(class="form-control", rows="3") }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.description.label(class="form-label") }}
+            {{ form.description(class="form-control", rows="6") }}
+        </div>
+
+        <hr />
+
+        <h4>SEO Meta Data</h4>
+
+        <div class="mb-3">
+            {{ form.meta_title.label(class="form-label") }}
+            {{ form.meta_title(class="form-control") }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.meta_description.label(class="form-label") }}
+            {{ form.meta_description(class="form-control", rows="3") }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.meta_keywords.label(class="form-label") }}
+            {{ form.meta_keywords(class="form-control") }}
+        </div>
+
+        <hr />
+
+        <h4>Twitter Metadata</h4>
+
+        <div class="mb-3">
+            {{ form.twitter_title.label(class="form-label") }}
+            {{ form.twitter_title(class="form-control") }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.twitter_description.label(class="form-label") }}
+            {{ form.twitter_description(class="form-control", rows="3") }}
+        </div>
+
+        <div class="mb-3">
+            {{ form.twitter_keywords.label(class="form-label") }}
+            {{ form.twitter_keywords(class="form-control") }}
+        </div>
+
+        <button type="submit" class="btn btn-primary">Update Blog</button>
+        <a href="{{ url_for('blog_list') }}" class="btn btn-secondary ms-2">Cancel</a>
+    </form>
+</div>
+    </div>
+</div>
+{% endblock %}

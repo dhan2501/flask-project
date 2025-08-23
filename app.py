@@ -5,11 +5,25 @@ import os
 from flask import current_app, request, flash, redirect, url_for, render_template, session
 from werkzeug.utils import secure_filename
 from forms import *
-from models import User, Banner, Blog
+from models import *
 from flask import request
+from flask_mail import Mail, Message
+from email_validator import validate_email, EmailNotValidError
+
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'  # Required for session and flash
+
+
+app.config.update(
+    MAIL_SERVER='smtp.gmail.com',
+    MAIL_PORT=587,
+    MAIL_USE_TLS=True,
+    MAIL_USERNAME='dhananjaygupta2501@gmail.com',          # your Gmail
+    MAIL_PASSWORD='sant iekm bgwe wgyw',    # App password, not your Gmail password
+    MAIL_DEFAULT_SENDER='dhananjaygupta2501@gmail.com'
+)
+mail = Mail(app)
 
 # Replace these values with your phpMyAdmin/MySQL details
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:@localhost/flaskproject'
@@ -17,9 +31,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)  # Initialize db with flask app
 
-# @app.route('/')
-# def home():
-#     return 'Home Page Loaded Successfully!'
+
 
 @app.route('/')
 def home():
@@ -30,6 +42,21 @@ def home():
     banners = Banner.query.all()
 
     return render_template('home.html', banner_main=banner_main, banners=banners)
+
+
+@app.route('/about')
+def about():
+    return render_template('frontend/about.html')
+
+
+@app.route('/blog')
+def blog():
+    return render_template('frontend/blog.html')
+
+
+@app.route('/contact')
+def contact():
+    return render_template('frontend/contact.html')
 
 
 @app.context_processor
@@ -103,45 +130,6 @@ def dashboard():
     # Pass username stored in session during login
     return render_template('dashboard.html', user_name=session.get('user_name', 'User'))
 
-
-# @app.route('/profile', methods=['GET', 'POST'])
-# def profile():
-#     user_name = session.get('user_name', 'User')
-#     if not session.get('superuser'):
-#         flash('Access denied.')
-#         return redirect(url_for('login'))
-
-#     user = User.query.filter_by(username=session.get('user_name')).first()
-#     if not user:
-#         flash('User not found.')
-#         return redirect(url_for('login'))
-
-#     form = ProfileForm(obj=user)
-
-#     if form.validate_on_submit():
-#         # Update username too
-#         user.username = form.username.data
-#         user.email = form.email.data
-#         user.phone_number = form.phone_number.data
-#         user.nickname = form.nickname.data
-
-#         if form.password.data:
-#             user.set_password(form.password.data)
-
-#         db.session.commit()
-
-#         # Update session username if changed
-#         session['user_name'] = user.username
-
-#         flash("Profile updated successfully!")
-#         return redirect(url_for('profile'))
-
-#     return render_template('profile.html', form=form, user_name=user_name)
-
-# from werkzeug.utils import secure_filename
-# import os
-# from flask import current_app
-
 @app.route('/profile', methods=['GET', 'POST'])
 def profile():
     user_name = session.get('user_name', 'User')
@@ -187,38 +175,6 @@ def profile():
         return redirect(url_for('profile'))
 
     return render_template('profile.html', form=form, user_name=user_name, user=user)
-
-
-
-
-# @app.route('/settings', methods=['GET', 'POST'])
-# def settings():
-#     user_name = session.get('user_name', 'User')
-#     if not session.get('superuser'):
-#         flash('Access denied.')
-#         return redirect(url_for('login'))
-
-#     user = User.query.filter_by(username=session.get('user_name')).first()
-#     if not user:
-#         flash('User not found.')
-#         return redirect(url_for('login'))
-
-#     form = SettingsForm()
-
-#     if form.validate_on_submit():
-#         if form.new_password.data:
-#             user.set_password(form.new_password.data)
-#         # Save email notification preference in your user model if available
-#         # user.email_notifications = form.email_notifications.data
-        
-#         db.session.commit()
-#         flash('Settings updated!')
-#         return redirect(url_for('settings'))
-
-#     # Prepopulate form from user data if needed
-#     # form.email_notifications.data = user.email_notifications if hasattr(user, 'email_notifications') else False
-
-#     return render_template('settings.html', form=form, user_name=user_name)
 
 
 @app.route('/settings', methods=['GET', 'POST'])
@@ -340,10 +296,78 @@ def update_banner(banner_id):
 
     return render_template('update_banner.html', form=form, banner=banner)
 
+@app.route('/blog-list')
+def blog_list():
+    if not session.get('superuser'):
+        flash('Access denied.')
+        return redirect(url_for('login'))
+    blogs = Blog.query.order_by(Blog.id.desc()).all()
+    return render_template('blog_list.html', blogs=blogs)
+
+
+# @app.route('/add-category', methods=['GET', 'POST'])
+# def add_category():
+#     if request.method == 'POST':
+#         name = request.form['name']
+#         description = request.form.get('description', '')
+#         category = BlogCategory(name=name, description=description)
+#         db.session.add(category)
+#         db.session.commit()
+#         flash('Category added!')
+#         return redirect(url_for('add_category'))
+#     return render_template('add_category.html')
+
+@app.route('/category/<int:category_id>')
+def blogs_by_category(category_id):
+    category = BlogCategory.query.get_or_404(category_id)
+    blogs = Blog.query.filter_by(category_id=category.id).all()
+    return render_template('blog_list.html', blogs=blogs, category=category)
+
+@app.route('/blog/add-category', methods=['GET', 'POST'],  endpoint='add_category')
+def add_category():
+    form = CategoryForm()
+    if form.validate_on_submit():
+        category = BlogCategory(
+            name=form.name.data,
+            description=form.description.data
+        )
+        db.session.add(category)
+        db.session.commit()
+        flash('Category added successfully!')
+        return redirect(url_for('category_list'))
+    return render_template('add_category.html', form=form)
+
+@app.route('/blog/category-list')
+def category_list():
+    categories = db.session.query(
+        BlogCategory,
+        db.func.count(Blog.id).label('blog_count')
+    ).outerjoin(Blog).group_by(BlogCategory.id).all()
+    return render_template('category_list.html', categories=categories)
+
+
+@app.route('/blog/category/edit/<int:category_id>', methods=['GET', 'POST'])
+def edit_category(category_id):
+    category = BlogCategory.query.get_or_404(category_id)
+    form = CategoryForm(obj=category)
+    if form.validate_on_submit():
+        category.name = form.name.data
+        category.description = form.description.data
+        db.session.commit()
+        flash('Category updated successfully!')
+        return redirect(url_for('category_list'))
+    return render_template('edit_category.html', form=form)
+
+
 
 @app.route('/blog/add', methods=['GET', 'POST'])
 def add_blog():
     form = BlogForm()
+    
+    # Load categories for select options
+    categories = BlogCategory.query.order_by(BlogCategory.name).all()
+    form.category_id.choices = [(c.id, c.name) for c in categories]
+    
     if form.validate_on_submit():
         image_file = form.image.data
         filename = None
@@ -356,7 +380,7 @@ def add_blog():
             image_url = url_for('static', filename='uploads/' + filename, _external=True)
         else:
             image_url = None
-        
+
         blog = Blog(
             image_url=image_url or "",
             alt_text=form.alt_text.data,
@@ -368,13 +392,185 @@ def add_blog():
             twitter_title=form.twitter_title.data,
             twitter_description=form.twitter_description.data,
             twitter_keywords=form.twitter_keywords.data,
-            schema_data=None  # Or handle schema JSON if you have it in form
+            category_id=form.category_id.data,  # save selected category
+            schema_data=None
         )
         db.session.add(blog)
         db.session.commit()
         flash('Blog added successfully!')
         return redirect(url_for('blog_list'))
+    
     return render_template('add_blog.html', form=form)
+
+@app.route('/blog/<int:blog_id>')
+def blog_detail(blog_id):
+    blog = Blog.query.get_or_404(blog_id)
+    return render_template('blog_detail.html', blog=blog)
+
+
+
+@app.route('/blog/edit/<int:blog_id>', endpoint='edit_blog', methods=['GET', 'POST'])
+def update_blog(blog_id):
+    blog = Blog.query.get_or_404(blog_id)  # Fetch blog or 404 if not found
+    form = BlogForm(obj=blog)  # Populate form with blog data
+
+    if form.validate_on_submit():
+        image_file = form.image.data
+        if image_file:
+            filename = secure_filename(image_file.filename)
+            upload_folder = os.path.join(current_app.root_path, 'static', 'uploads')
+            os.makedirs(upload_folder, exist_ok=True)
+            image_path = os.path.join(upload_folder, filename)
+            image_file.save(image_path)
+            blog.image_url = url_for('static', filename='uploads/' + filename, _external=True)
+        # Update blog fields from form data
+        blog.alt_text = form.alt_text.data
+        blog.short_description = form.short_description.data
+        blog.description = form.description.data
+        blog.meta_title = form.meta_title.data
+        blog.meta_description = form.meta_description.data
+        blog.meta_keywords = form.meta_keywords.data
+        blog.twitter_title = form.twitter_title.data
+        blog.twitter_description = form.twitter_description.data
+        blog.twitter_keywords = form.twitter_keywords.data
+
+        # Optionally handle schema_data if in form
+        # blog.schema_data = ...
+
+        db.session.commit()
+        flash('Blog updated successfully!')
+        return redirect(url_for('blog_list'))
+
+    return render_template('edit_blog.html', form=form, blog=blog)
+
+
+@app.route('/contact-us', methods=['GET', 'POST'])
+def contact_us():
+    if request.method == 'POST':
+        name = request.form.get('name')
+        email = request.form.get('email')
+        message = request.form.get('message')
+
+        # Email to site owner
+        # msg_to_admin = Message(
+        #     subject=f"New Contact Form Submission from {name}",
+        #     recipients=['dhananjaygupta2501@gmail.com'],  # Your email
+        #     body=f"Name: {name}\nEmail: {email}\nMessage:\n{message}"
+        # )
+
+        msg_to_admin = Message(
+            subject=f"New Contact Form Submission from {name}",
+            recipients=['dhananjaygupta2501@gmail.com'],
+            html=f"""
+            <html>
+            <body style="font-family: Arial, sans-serif; background:#f9f9f9; padding:20px;">
+            <div style="max-width:600px; margin:auto; background:#fff; padding:20px; border:1px solid #ddd; border-radius:6px;">
+                <h2 style="color:#1a73e8; text-align:center;">New Contact Form Submission</h2>
+                <p><strong>Name:</strong> {name}</p>
+                <p><strong>Email:</strong> {email}</p>
+                <p><strong>Message:</strong></p>
+                <blockquote style="background:#f1f1f1; border-left:4px solid #1a73e8; padding:10px 15px; font-style:italic; color:#555; white-space: pre-wrap;">{message}</blockquote>
+            </div>
+            </body>
+            </html>
+            """
+        )
+
+
+        # Thank you email to user
+        # msg_to_user = Message(
+        #     subject="Thank you for contacting us",
+        #     recipients=[email],  # User’s email
+        #     body=f"Dear {name},\n\nThank you for reaching out to us. We have received your message and will get back to you shortly.\n\nBest regards,\nManaging Director"
+        # )
+
+        msg_to_user = Message(
+            subject="Thank you for contacting us",
+            recipients=[email],  # User's email
+            html=f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+            <meta charset="UTF-8" />
+            <title>Thank You</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px; }}
+                .container {{ max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }}
+                h2 {{ color: #2e8b57; }}
+                p {{ font-size: 16px; color: #333; }}
+            </style>
+            </head>
+            <body>
+            <div class="container">
+                <h2>Thank You, {name}!</h2>
+                <p>We have received your message and will get back to you shortly.</p>
+                <p><strong>Your Message:</strong></p>
+                <blockquote style="background:#f1f1f1; padding:10px; border-left: 5px solid #2e8b57;">{message}</blockquote>
+                <p>Best regards,<br/>Managing Director</p>
+            </div>
+            </body>
+            </html>
+            """
+        )
+
+
+        try:
+            mail.send(msg_to_admin)
+            mail.send(msg_to_user)
+            flash('Message sent successfully! A confirmation email has been sent to your email.')
+        except Exception as e:
+            flash('Failed to send message. Please try again later.')
+            print(f"Error sending mail: {e}")
+
+        return redirect(url_for('contact_us'))
+
+    # Render the contact form on GET
+    return render_template('frontend/contact.html')
+
+
+@app.route('/help')
+def help():
+    return render_template('help.html')
+
+@app.route('/contact-support', methods=['GET', 'POST'])
+def contact_support():
+    if request.method == 'POST':
+        name = request.form.get('name')
+        email = request.form.get('email')
+        message = request.form.get('message')
+
+        if not name or not email or not message:
+            flash('All fields are required.', 'danger')
+            return redirect(url_for('contact_support'))
+        
+        # Validate email
+        try:
+            validated_email = validate_email(email).email
+        except EmailNotValidError as e:
+            flash(str(e), 'danger')
+            return redirect(url_for('contact_support'))
+
+        # Send thank you email to user
+        user_msg = Message(
+            subject="Thank you for contacting support",
+            recipients=[validated_email],
+            body=f"Hi {name},\n\nThank you for reaching out! We received your message and will get back to you shortly.\n\nYour message:\n{message}\n\nBest regards,\nSupport Team"
+        )
+        mail.send(user_msg)
+
+        # Send notification email to admin
+        admin_email = 'dhananjaygupta2501@gmail.com'  # replace with your admin email
+        admin_msg = Message(
+            subject="New Support Request Received",
+            recipients=[admin_email],
+            body=f"Support request from {name} ({validated_email}):\n\n{message}"
+        )
+        mail.send(admin_msg)
+
+        flash('Thank you for contacting support! Confirmation sent to your email.', 'success')
+        return redirect(url_for('contact_support'))
+
+    return render_template('contact_support.html')
 
 
 # if __name__ == '__main__':
@@ -383,3 +579,5 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()  # This creates the Banner table if not exists
     app.run(debug=True)
+    # app.run(port=5001, debug=True)
+

@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField
-from wtforms.validators import DataRequired, Email, EqualTo, Optional
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, TextAreaField, SelectField
+from wtforms.validators import DataRequired, Email, EqualTo, Optional,Length
 from flask_wtf.file import FileField, FileAllowed, FileRequired
 
 class RegistrationForm(FlaskForm):
@@ -60,6 +60,7 @@ class BlogForm(FlaskForm):
     alt_text = StringField('Alt Text', validators=[Optional()])
     short_description = StringField('Short Description', validators=[Optional()])
     description = TextAreaField('Description', validators=[DataRequired()])
+    category_id = SelectField('Category', coerce=int, validators=[DataRequired()])
     
     meta_title = StringField('Meta Title', validators=[Optional()])
     meta_description = TextAreaField('Meta Description', validators=[Optional()])
@@ -72,3 +73,8 @@ class BlogForm(FlaskForm):
     # You can add a field or JSON input for schema_data or handle it separately
     
     submit = SubmitField('Submit')
+
+class CategoryForm(FlaskForm):
+    name = StringField('Category Name', validators=[DataRequired(), Length(max=100)])
+    description = TextAreaField('Description')
+    submit = SubmitField('Save')

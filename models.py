@@ -28,10 +28,20 @@ class Banner(db.Model):
 
     def __repr__(self):
         return f"<Banner {self.heading}>"
-    
+
+class BlogCategory(db.Model):
+    __tablename__ = 'blog_categories'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), unique=True, nullable=False)
+    description = db.Column(db.Text, nullable=True)
+
+    def __repr__(self):
+        return f"<BlogCategory {self.name}>"    
 
 class Blog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    category_id = db.Column(db.Integer, db.ForeignKey('blog_categories.id'))
+    category = db.relationship('BlogCategory', backref='blogs')
     
     # Blog content fields
     image_url = db.Column(db.String(255), nullable=False)       # URL or path to blog image
