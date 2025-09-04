@@ -1,6 +1,8 @@
 # models.py
 from extensions import db
 from werkzeug.security import generate_password_hash, check_password_hash
+from slugify import slugify
+
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -67,3 +69,74 @@ class Blog(db.Model):
 
     def __repr__(self):
         return f"<Blog {self.meta_title or self.short_description[:30]}>"
+
+
+
+
+# Association table for Product <-> Tag many-to-many relationship
+product_tags = db.Table('product_tags',
+    db.Column('product_id', db.Integer, db.ForeignKey('product.id'), primary_key=True),
+    db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'), primary_key=True)
+)
+
+class Category(db.Model):
+    __tablename__ = 'category'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), unique=True, nullable=False)
+    slug = db.Column(db.String(120), unique=True, nullable=False)
+    description = db.Column(db.Text)
+    meta_title = db.Column(db.String(255))
+    meta_description = db.Column(db.Text)
+    meta_image = db.Column(db.String(255))
+    active = db.Column(db.Boolean, default=False)
+    products = db.relationship('Product', back_populates='category', lazy='dynamic')
+
+    def __init__(self, name, **kwargs):
+        super().__init__(name=name, **kwargs)
+        self.slug = slugify(name)  # auto-generate slug
+
+class Tag(db.Model):
+    __tablename__ = 'tag'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True, nullable=False)
+    products = db.relationship('Product', secondary=product_tags, back_populates='tags', lazy='dynamic')
+
+class ProductGallery(db.Model):
+    __tablename__ = 'product_gallery'
+    id = db.Column(db.Integer, primary_key=True)
+    image_url = db.Column(db.String(255), nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
+
+class ProductSchema(db.Model):
+    __tablename__ = 'product_schema'
+    id = db.Column(db.Integer, primary_key=True)
+    schema_json = db.Column(db.Text)  # stores rich snippet/schema markup
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
+
+class Product(db.Model):
+    __tablename__ = 'product'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(150), nullable=False)
+    slug = db.Column(db.String(160), unique=True, nullable=False)
+    regular_price = db.Column(db.Float, nullable=False)
+    sale_price = db.Column(db.Float, nullable=True)
+    short_description = db.Column(db.String(255))
+    description = db.Column(db.Text)
+    meta_title = db.Column(db.String(255))
+    meta_description = db.Column(db.Text)
+    meta_image = db.Column(db.String(255))
+    twitter_title = db.Column(db.String(255))
+    twitter_description = db.Column(db.Text)
+    og_title = db.Column(db.String(255))
+    og_description = db.Column(db.Text)
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
+    category = db.relationship('Category', back_populates='products')
+    tags = db.relationship('Tag', secondary=product_tags, back_populates='products', lazy='dynamic')
+    product_image = db.Column(db.String(255))  # main product image path or URL
+    gallery_images = db.relationship('ProductGallery', backref='product', lazy='dynamic')
+    schemas = db.relationship('ProductSchema', backref='product', lazy='dynamic')
+
+    def __init__(self, name, **kwargs):
+        super().__init__(name=name, **kwargs)
+        self.slug = slugify(name)  # auto-generate slug
+

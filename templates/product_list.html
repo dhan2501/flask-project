@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Product List{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        {% include 'sidebar.html' %}
+    </div>
+    <div class="col-md-9">
+        <h2>Products</h2>
+        <a href="{{ url_for('add_product') }}" class="btn btn-primary mb-3">Add New Product</a>
+
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Regular Price</th>
+                    <th>Sale Price</th>
+                    <th>Tags</th>
+                    <th>Actions</th>  <!-- New column -->
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.category.name if product.category else 'None' }}</td>
+                    <td>{{ product.regular_price }}</td>
+                    <td>{{ product.sale_price or '-' }}</td>
+                    <td>
+                        {% for tag in product.tags %}
+                            {{ tag.name }}{% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>
+                        <a href="{{ url_for('edit_product', product_id=product.id) }}" class="btn btn-sm btn-warning" title="Edit">
+                             <i class="bi bi-pencil"></i>
+                        </a>
+                    </td>
+
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center">No products found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Tag List{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Sidebar -->
+    <div class="col-md-3">
+        {% include 'sidebar.html' %}
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-md-9">
+        <h2>Tags</h2>
+
+        <a href="{{ url_for('add_tag') }}" class="btn btn-primary mb-3">Add New Tag</a>
+
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Tag Name</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tag in tags %}
+                <tr>
+                    <td>{{ tag.name }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td class="text-center">No tags found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

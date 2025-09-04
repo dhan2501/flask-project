@@ -49,6 +49,66 @@
                 </ul>
             </div>
         </li>
+        <li class="nav-item mb-1">
+    <a class="nav-link text-white px-3 py-2 rounded dropdown-toggle 
+        {% if request.endpoint in ['add_product', 'product_list', 'category_list_app', 'category_list_admin', 'add_tag', 'tag_list'] %}
+            active bg-secondary
+        {% endif %}" 
+        href="#" id="productDropdown" data-bs-toggle="collapse" data-bs-target="#productSubmenu" aria-expanded="false" aria-controls="productSubmenu">
+        Product
+    </a>
+    <div class="collapse 
+        {% if request.endpoint in ['add_product', 'product_list', 'category_list_app', 'category_list_admin', 'add_tag', 'tag_list'] %}
+            show
+        {% endif %}" id="productSubmenu">
+        <ul class="nav flex-column ms-3">
+
+            <!-- Product Links -->
+            <li class="nav-item mb-1">
+                <a href="{{ url_for('add_product') }}" class="nav-link text-white 
+                    {% if request.endpoint == 'add_product' %}active bg-secondary{% endif %} rounded px-3 py-2">
+                    Add Product
+                </a>
+            </li>
+            <li class="nav-item mb-1">
+                <a href="{{ url_for('product_list') }}" class="nav-link text-white 
+                    {% if request.endpoint == 'product_list' %}active bg-secondary{% endif %} rounded px-3 py-2">
+                    Product List
+                </a>
+            </li>
+
+            <!-- Category Links -->
+            <li class="nav-item mb-1">
+                <a href="{{ url_for('category_list_admin') }}" class="nav-link text-white 
+                    {% if request.endpoint == 'category_list_admin' %}active bg-secondary{% endif %} rounded px-3 py-2">
+                    Add Category
+                </a>
+            </li>
+            <li class="nav-item mb-1">
+                <a href="{{ url_for('category_list_app') }}" class="nav-link text-white 
+                    {% if request.endpoint == 'category_list_app' %}active bg-secondary{% endif %} rounded px-3 py-2">
+                    Category List
+                </a>
+            </li>
+
+            <!-- Tag Links -->
+            <li class="nav-item mb-1">
+                <a href="{{ url_for('add_tag') }}" class="nav-link text-white 
+                    {% if request.endpoint == 'add_tag' %}active bg-secondary{% endif %} rounded px-3 py-2">
+                    Add Tag
+                </a>
+            </li>
+            <li class="nav-item mb-1">
+                <a href="{{ url_for('tag_list') }}" class="nav-link text-white 
+                    {% if request.endpoint == 'tag_list' %}active bg-secondary{% endif %} rounded px-3 py-2">
+                    Tag List
+                </a>
+            </li>
+        </ul>
+    </div>
+</li>
+
+
 
         <!-- Blog Dropdown -->
         {#% comment %} <li class="nav-item mb-1">

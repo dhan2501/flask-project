@@ -11,6 +11,8 @@ from flask_mail import Mail, Message
 from email_validator import validate_email, EmailNotValidError
 
 
+
+
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'  # Required for session and flash
 
@@ -572,6 +574,219 @@ def contact_support():
 
     return render_template('contact_support.html')
 
+
+
+
+
+# Category Routes
+@app.route('/category/list', endpoint='category_list_app')
+def category_list():
+    categories = Category.query.all()
+    return render_template('product_category_list.html', categories=categories)
+
+@app.route('/category/add', methods=['GET', 'POST'], endpoint='category_list_admin')
+def add_category():
+    if request.method == 'POST':
+        name = request.form['name']
+        category = Category(name=name)
+        db.session.add(category)
+        db.session.commit()
+        return redirect(url_for('category_list'))
+    return render_template('product_add_category.html')
+
+# Tag Routes
+@app.route('/tag/list')
+def tag_list():
+    tags = Tag.query.all()
+    return render_template('tag_list.html', tags=tags)
+
+@app.route('/tag/add', methods=['GET', 'POST'])
+def add_tag():
+    if request.method == 'POST':
+        name = request.form['name']
+        tag = Tag(name=name)
+        db.session.add(tag)
+        db.session.commit()
+        return redirect(url_for('tag_list'))
+    return render_template('add_tag.html')
+
+# Product Routes
+@app.route('/product/list')
+def product_list():
+    products = Product.query.all()
+    return render_template('product_list.html', products=products)
+
+@app.route('/product/add', methods=['GET', 'POST'])
+def add_product():
+    categories = Category.query.all()
+    tags = Tag.query.all()
+
+    upload_folder = 'static/uploads/products'
+    gallery_folder = 'static/uploads/products/gallery'
+    os.makedirs(upload_folder, exist_ok=True)
+    os.makedirs(gallery_folder, exist_ok=True)
+
+    if request.method == 'POST':
+        name = request.form['name']
+        regular_price = float(request.form['regular_price'])
+        sale_price = request.form.get('sale_price')
+        sale_price = float(sale_price) if sale_price else None
+        short_description = request.form.get('short_description')
+        description = request.form.get('description')
+        meta_title = request.form.get('meta_title')
+        meta_description = request.form.get('meta_description')
+        twitter_title = request.form.get('twitter_title')
+        twitter_description = request.form.get('twitter_description')
+        og_title = request.form.get('og_title')
+        og_description = request.form.get('og_description')
+
+        category_id = int(request.form['category'])
+        selected_tags = request.form.getlist('tags')
+
+        product = Product(
+            name=name,
+            slug=slugify(name),
+            regular_price=regular_price,
+            sale_price=sale_price,
+            short_description=short_description,
+            description=description,
+            meta_title=meta_title,
+            meta_description=meta_description,
+            twitter_title=twitter_title,
+            twitter_description=twitter_description,
+            og_title=og_title,
+            og_description=og_description,
+            category_id=category_id,
+        )
+
+        for tag_id in selected_tags:
+            tag = Tag.query.get(int(tag_id))
+            if tag:
+                product.tags.append(tag)
+
+        # Handle main product image upload
+        main_image = request.files.get('product_image')
+        if main_image and main_image.filename:
+            filename = secure_filename(main_image.filename)
+            filepath = os.path.join(upload_folder, filename)
+            main_image.save(filepath)
+            product.product_image = '/' + filepath  # store relative URL/path
+
+        db.session.add(product)
+        db.session.commit()
+
+        # Handle gallery images upload after committing product to get its ID
+        gallery_files = request.files.getlist('gallery_images')
+        for file in gallery_files:
+            if file and file.filename:
+                filename = secure_filename(file.filename)
+                gallery_path = os.path.join(gallery_folder, filename)
+                file.save(gallery_path)
+                gallery_image = ProductGallery(image_url='/' + gallery_path, product=product)
+                db.session.add(gallery_image)
+
+        db.session.commit()
+
+        flash('Product added successfully', 'success')
+        return redirect(url_for('product_list'))
+    
+    return render_template('add_product.html', categories=categories, tags=tags)
+
+
+
+
+@app.route('/product/edit/<int:product_id>', methods=['GET', 'POST'], endpoint='edit_product')
+def edit_product(product_id):
+    product = Product.query.get_or_404(product_id)
+    categories = Category.query.all()
+    tags = Tag.query.all()
+
+    upload_folder = 'static/uploads/products'
+    gallery_folder = 'static/uploads/products/gallery'
+    os.makedirs(upload_folder, exist_ok=True)
+    os.makedirs(gallery_folder, exist_ok=True)
+
+    if request.method == 'POST':
+        product.name = request.form['name']
+        slug = request.form.get('slug').strip()
+        product.slug = slugify(slug) if slug else slugify(product.name)
+        product.regular_price = float(request.form['regular_price'])
+        sale_price = request.form.get('sale_price')
+        product.sale_price = float(sale_price) if sale_price else None
+        product.short_description = request.form.get('short_description')
+        product.description = request.form.get('description')
+        product.category_id = int(request.form['category'])
+
+        selected_tag_ids = request.form.getlist('tags')
+        product.tags = []
+        for tag_id in selected_tag_ids:
+            tag = Tag.query.get(int(tag_id))
+            if tag:
+                product.tags.append(tag)
+
+        main_image = request.files.get('product_image')
+        if main_image and main_image.filename:
+            filename = secure_filename(main_image.filename)
+            image_path = os.path.join('static/uploads/products', filename)
+            main_image.save(image_path)
+            product.product_image = '/' + image_path
+
+        gallery_files = request.files.getlist('gallery_images')
+        for file in gallery_files:
+            if file and file.filename:
+                filename = secure_filename(file.filename)
+                gallery_path = os.path.join('static/uploads/products/gallery', filename)
+                file.save(gallery_path)
+                gallery_image = ProductGallery(image_url='/' + gallery_path, product=product)
+                db.session.add(gallery_image)
+
+        schema_json = request.form.get('schema_json')
+        if schema_json:
+            schema_obj = product.schemas.first()
+            if schema_obj:
+                schema_obj.schema_json = schema_json
+            else:
+                new_schema = ProductSchema(schema_json=schema_json, product=product)
+                db.session.add(new_schema)
+
+        product.meta_title = request.form.get('meta_title')
+        product.meta_description = request.form.get('meta_description')
+        product.twitter_title = request.form.get('twitter_title')
+        product.twitter_description = request.form.get('twitter_description')
+        product.og_title = request.form.get('og_title')
+        product.og_description = request.form.get('og_description')
+
+        try:
+            db.session.commit()
+            flash('Product updated successfully.', 'success')
+            return redirect(url_for('product_list'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error updating product: {e}', 'danger')
+
+    return render_template('edit_product.html', product=product, categories=categories, tags=tags)
+
+
+@app.route('/products')
+def product_display():
+    products = Product.query.all()
+    return render_template('frontend/product_display.html', products=products)
+
+
+@app.route('/add-to-cart', methods=['POST'])
+def add_to_cart():
+    product_id = request.form.get('product_id')
+    product = Product.query.get(product_id)
+    if not product:
+        flash('Invalid product.', 'danger')
+        return redirect(url_for('product_display'))
+
+    # Simple cart implementation in session
+    cart = session.get('cart', {})
+    cart[product_id] = cart.get(product_id, 0) + 1
+    session['cart'] = cart
+    flash(f'Added {product.name} to cart.', 'success')
+    return redirect(url_for('product_display'))
 
 # if __name__ == '__main__':
 #     app.run(debug=True)
