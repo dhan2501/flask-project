@@ -39,7 +39,7 @@ db.init_app(app)  # Initialize db with flask app
 def home():
     # Query single main banner (for Hero section)
     banner_main = Banner.query.first()  # Or select by type/flag
-
+    
     # Query other banners for Popular Destination
     banners = Banner.query.all()
 
@@ -579,6 +579,27 @@ def contact_support():
 
 
 # Category Routes
+from sqlalchemy import func
+@app.context_processor
+def inject_categories():
+    categories_with_counts = (
+        db.session.query(
+            Category,
+            func.count(Product.id).label('product_count')
+        )
+        .outerjoin(Category.products)
+        .group_by(Category.id)
+        .all()
+    )
+    return dict(categories=categories_with_counts)
+
+@app.route('/category/<slug>')
+def category_view(slug):
+    category = Category.query.filter_by(slug=slug).first_or_404()
+    products = category.products.all()  # Assuming lazy='dynamic'
+    return render_template('category.html', category=category, products=products)
+
+
 @app.route('/category/list', endpoint='category_list_app')
 def category_list():
     categories = Category.query.all()

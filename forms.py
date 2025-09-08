@@ -45,14 +45,14 @@ class SettingsForm(FlaskForm):
 
 class BannerForm(FlaskForm):
     image = FileField('Banner Image', validators=[
-        FileRequired(),
+        Optional(),  # <-- Change from FileRequired() to Optional()
         FileAllowed(['jpg', 'png', 'jpeg', 'gif'], 'Images only!')
     ])
     alt_text = StringField('Alt Text', validators=[Optional()])
     read_more_link = StringField('Read More Link', validators=[Optional()])
     heading = StringField('Heading', validators=[DataRequired()])
     sub_heading = StringField('Sub Heading', validators=[Optional()])
-    submit = SubmitField('Add Banner')
+    submit = SubmitField('Update Banner')
 
 
 class BlogForm(FlaskForm):
