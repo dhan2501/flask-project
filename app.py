@@ -597,8 +597,12 @@ def inject_categories():
 def category_view(slug):
     category = Category.query.filter_by(slug=slug).first_or_404()
     products = category.products.all()  # Assuming lazy='dynamic'
-    return render_template('category.html', category=category, products=products)
+    return render_template('frontend/category.html', category=category, products=products)
 
+@app.route('/product/<int:product_id>')
+def product_detail(product_id):
+    product = Product.query.get_or_404(product_id)
+    return render_template('frontend/product_detail.html', product=product)
 
 @app.route('/category/list', endpoint='category_list_app')
 def category_list():

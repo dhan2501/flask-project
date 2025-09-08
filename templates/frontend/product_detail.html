@@ -1,0 +1,13 @@
+{% extends "frontend/front-base.html" %}
+
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>{{ product.name }}</h1>
+    <img src="{{ product.product_image }}" alt="{{ product.name }}" class="img-fluid mb-3">
+    <p>{{ product.description }}</p>
+    <h3>Price: ${{ product.price }}</h3>
+    <!-- Add more product details as needed -->
+</div>
+{% endblock %}
